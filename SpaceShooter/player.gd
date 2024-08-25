@@ -2,6 +2,21 @@ extends Area2D
 
 @onready var screensize = get_viewport_rect().size
 
+signal died
+signal shield_changed
+
+@export var max_shield = 10
+var shield = max_shield:
+	set = set_shield
+
+func set_shield(value):
+	shield = min(max_shield, value)
+	shield_changed.emit(max_shield, shield)
+	if shield <= 0:
+		hide()
+		died.emit()
+
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 @export var speed = 150
 @export var cooldown = 0.25
@@ -52,4 +67,10 @@ func _process(delta):
 	if Input.is_action_pressed("shoot"):
 		shoot()
 	
+
+
+func _on_area_entered(area):
+	if area.is_in_group("enemies"):
+		area.explode()
+		shield -= max_shield / 2
 
